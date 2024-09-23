@@ -12,12 +12,14 @@
             color: grey;
             font-size: 13px;
         }
+
         form {
             margin: auto;
             padding: 10px;
             width: 100%;
             max-width: 400px;
         }
+
         input[type=text], input[type=password], input[type=button] {
             padding: 10px;
             margin: 10px;
@@ -25,16 +27,19 @@
             border-radius: 5px;
             border: solid 1px grey;
         }
+
         input[type=button] {
-            width: 100%;
+            width: 103%;
             cursor: pointer;
             background-color: #2b5488;
             color: white;
         }
+
         input[type=radio] {
             transform: scale(1.2);
             cursor: pointer;
         }
+
         #header {
             background-color: #485b6c;
             font-size: 40px;
@@ -42,38 +47,34 @@
             width: 100%;
             color: white;
         }
+
         #error {
             text-align: center;
             padding: 0.5rem;
             background-color: #ecaf91;
-            color: black;
+            color: white; 
             display: none;
             font-size: 12px;
         }
     </style>
 </head>
 <body>
+
     <div id="wrapper">
         <div id="header">
             My Chat
-            <div style="font-size: 20px; margin: 20px;">Signup</div>
-            <div id="error"></div>
-    </div>
+            <div style="font-size: 20px; margin: 20px;">Login</div>
+            <div id="error"></div> <!-- Error message display -->
+        </div>
+        
         <form id="myform"> 
-            <input type="text" name="username" placeholder="Username" required><br>
-            <input type="text" name="email" placeholder="Email" required><br>
-            <div style="padding: 10px;">
-                <br>Gender:<br>
-                <input type="radio" value="Male" name="gender" required> Male <br>
-                <input type="radio" value="Female" name="gender"> Female <br>
-            </div>
-            <input type="password" name="password" placeholder="Password" required><br>
-            <input type="password" name="password2" placeholder="Retype Password" required><br>
-            <input type="button" value="Sign Up" id="signup_button"><br>
+            <input type="text" name="email" placeholder="Email"><br>
+            <input type="password" name="password" placeholder="Password"><br>
+            <input type="button" value="Login" id="login_button"><br>
 
             <br>
-            <a href="login.php" style="display: block;text-align: center;text-decoration: none;">
-                Already have an Account? Login here
+            <a href="signup.php" style="display: block;text-align: center;text-decoration: none;">
+                Dont have an Account? Signup here
             </a>
         </form>
     </div>
@@ -83,41 +84,36 @@
             return document.getElementById(element);
         }
 
-        var signup_button = _("signup_button");
-        signup_button.addEventListener("click", collect_data);
+        var login_button = _("login_button");
+        login_button.addEventListener("click", collect_data);
 
         function collect_data() {
-            signup_button.disabled = true;
-            signup_button.value = "Loading... Please Wait...";
+            login_button.disabled = true;
+            login_button.value = "Loading...Please wait..";
 
             var myform = _("myform");
             var inputs = myform.getElementsByTagName("INPUT");
-
             var data = {};
-            for (var i = 0; i < inputs.length; i++) {
+
+            for (var i = inputs.length - 1; i >= 0; i--) {
                 var key = inputs[i].name;
                 if (key) {
-                    if (key === "gender") {
-                        if (inputs[i].checked) {
-                            data.gender = inputs[i].value;
-                        }
-                    } else {
-                        data[key] = inputs[i].value;
-                    }
+                    data[key] = inputs[i].value; // Collect input values dynamically
                 }
             }
-
-            send_data(data, "signup");
+            console.log("Data being sent:", data); // Log the data
+            send_data(data, "login");
         }
 
         function send_data(data, type) {
             var xml = new XMLHttpRequest();
-
             xml.onload = function() {
-                if (xml.readyState == 4 && xml.status == 200) {
-                    handle_result(xml.responseText);
-                    signup_button.disabled = false;
-                    signup_button.value = "Sign Up";
+                if (xml.status == 200) {
+                    handle_results(xml.responseText);
+                    login_button.disabled = false;
+                    login_button.value = "Login";
+                } else {
+                    console.error("Request failed with status:", xml.status);
                 }
             };
 
@@ -129,14 +125,15 @@
             xml.send(data_string);
         }
 
-        function handle_result(result) {
-            var data = JSON.parse(result);
+        function handle_results(results) {
+            var data = JSON.parse(results);
+            var error = _("error"); // Get the error display element
+
             if (data.data_type === "info") {
-                window.location = "index.php"; // Redirect on successful signup
+                window.location.href = "index.php";
             } else {
-                var error = _("error");
                 error.innerHTML = data.message;
-                error.style.display = "block"; // Show error message
+                error.style.display = "block"; // Show the error message
             }
         }
     </script>

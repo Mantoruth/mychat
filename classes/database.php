@@ -42,6 +42,25 @@ class Database
         }
     }
 
+    // reading from the database
+    public function read($query, $data_array = [])
+    {
+        try {
+            $statement = $this->con->prepare($query); // Use $this->con
+
+            foreach ($data_array as $key => $value) {
+                $statement->bindParam(':' . $key, $data_array[$key]); // Bind parameters
+            }
+
+            $statement->execute(); // Return the result of execution
+            return $statement->fetchAll(PDO::FETCH_OBJ); // Fetch all results as an associative array
+        } catch (PDOException $e) {
+            // Log the error
+            error_log("SQL Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
     // Generate a random user ID
     public function generate_id($max)
     {
